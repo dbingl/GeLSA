@@ -4,7 +4,18 @@
 
 using namespace std;
 
-__device__ void kernel_2(float* Gpu_ptr_X, float* Gpu_ptr_Y, int ROW, int COL, int x, int y, int* r, float* score, int* x_0, int* y_0, int* x_1, int* y_1)              //动态规划判断
+__device__ void kernel_2(float* Gpu_ptr_X, 
+						float* Gpu_ptr_Y, 
+						int ROW, 	
+						int COL, 
+						int x, 
+						int y, 
+						int* r, 
+						float* score, 
+						int* x_0, 
+						int* y_0, 
+						int* x_1, 
+						int* y_1)              //动态规划判断
 {
 	int shift = ROW / 2;
 	int block_size = gridDim.y;
@@ -104,12 +115,19 @@ __device__ void kernel_2(float* Gpu_ptr_X, float* Gpu_ptr_Y, int ROW, int COL, i
 
 		if (I <= shift)
 		{
-			x_0[block_size * x + y] = shift - I + P + 1; y_0[block_size * x + y] = P + 1; x_1[block_size * x + y] = shift - I + J + 1;  y_1[block_size * x + y] = J + 1;
+			x_0[block_size * x + y] = shift - I + P + 1; 
+			y_0[block_size * x + y] = P + 1; 
+			x_1[block_size * x + y] = shift - I + J + 1;  
+			y_1[block_size * x + y] = J + 1;
 		}
 		else
 		{
-			x_0[block_size * x + y] = P + 1; y_0[block_size * x + y] = I - shift + P + 1; y_1[block_size * x + y] = I - shift + J + 1; x_1[block_size * x + y] = J + 1;
+			x_0[block_size * x + y] = P + 1; 
+			y_0[block_size * x + y] = I - shift + P + 1; 
+			y_1[block_size * x + y] = I - shift + J + 1; 
+			x_1[block_size * x + y] = J + 1;
 		}
+
 		score[block_size * x + y] *= r[block_size * x + y];
 		score[block_size * x + y] /= COL;
 	}

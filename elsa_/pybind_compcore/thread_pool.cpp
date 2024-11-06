@@ -14,7 +14,19 @@ thread_local float* ptr_ry;
 class ThreadPool
 {
     public:
-        ThreadPool(size_t numThreads, long long n_01, long long n_02, int s, long long col, float* x, float* y,float* score_data,int* x_0,int* x_1,int* y_0,int* y_1)
+        ThreadPool(size_t numThreads, 
+                    long long n_01, 
+                    long long n_02, 
+                    int s, 
+                    long long col, 
+                    float* x, 
+                    float* y,
+                    float* score_data,
+                    int* x_0,
+                    int* x_1,
+                    int* y_0,
+                    int* y_1)
+                    
         {
             num_01 = n_01;
             num_02 = n_02;
@@ -138,11 +150,17 @@ class ThreadPool
                 }
                 if (I <= shift)
                     {
-                        x_0_data[num_x] = shift - I + P + 1; y_0_data[num_x] = P + 1; x_1_data[num_x] = shift - I + J + 1;  y_1_data[num_x] = J + 1;
+                        x_0_data[num_x] = shift - I + P + 1; 
+                        y_0_data[num_x] = P + 1; 
+                        x_1_data[num_x] = shift - I + J + 1;  
+                        y_1_data[num_x] = J + 1;
                     }
                 else
                     {
-                        x_0_data[num_x] = P + 1; y_0_data[num_x] = I - shift + P + 1; x_1_data[num_x] = J + 1; y_1_data[num_x] = I - shift + J + 1;  
+                        x_0_data[num_x] = P + 1; 
+                        y_0_data[num_x] = I - shift + P + 1; 
+                        x_1_data[num_x] = J + 1; 
+                        y_1_data[num_x] = I - shift + J + 1;  
                     }
 
                 score[num_x] = r1 * p1 / COL;
