@@ -102,8 +102,24 @@ __device__ void kernel_2(float* Gpu_ptr_X,
 				if (n_s == 0) n = j + 1;
 				else  if (n_s > max_n) max_n = n_s;
 
-				if (max_p > max_n) { if (max_p > score[block_size * x + y]) { score[block_size * x + y] = max_p; r[block_size * x + y] = 1; I = i, P = p, J = j; } }
-				else 			   { if (max_n > score[block_size * x + y]) { score[block_size * x + y] = max_n; r[block_size * x + y] =-1; I = i, P = n, J = j; } }
+				if (max_p > max_n) { 
+					if (max_p > score[block_size * x + y]) { 
+						score[block_size * x + y] = max_p; 
+						r[block_size * x + y] = 1; 
+						I = i; 
+						P = p; 
+						J = j; 
+					} 
+				}
+				else { 
+					if (max_n > score[block_size * x + y]) { 
+						score[block_size * x + y] = max_n; 
+						r[block_size * x + y] =-1; 
+						I = i;
+						P = n; 
+						J = j; 
+					} 
+				}
 			}
 		}
 
@@ -141,7 +157,13 @@ __global__ void kernel_1(float* Gpu_ptr_X,
 	int x = blockIdx.x;
 	int y = blockIdx.y;
 
-	kernel_2(Gpu_ptr_X,Gpu_ptr_X,ROW, COL, x, y, r, score, x_0, y_0, x_1, y_1);
+	kernel_2(Gpu_ptr_X,
+			Gpu_ptr_X,
+			ROW, 
+			COL, 
+			x, y, r, 
+			score, 
+			x_0, y_0, x_1, y_1);
 };
 
 extern "C"

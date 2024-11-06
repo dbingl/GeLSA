@@ -11,8 +11,7 @@ thread_local int ry;
 thread_local float* ptr_rx;
 thread_local float* ptr_ry;
 
-class ThreadPool
-{
+class ThreadPool {
     public:
         ThreadPool(size_t numThreads, 
                     long long n_01, 
@@ -25,9 +24,7 @@ class ThreadPool
                     int* x_0,
                     int* x_1,
                     int* y_0,
-                    int* y_1)
-                    
-        {
+                    int* y_1) {
             num_01 = n_01;
             num_02 = n_02;
             shift = s;
@@ -82,22 +79,19 @@ class ThreadPool
         vector<thread> workers;
         bool stop = false;
 
-        void workerFunction()
-        {
+        void workerFunction() {
             long long num_x = num_r.fetch_add(1, memory_order_relaxed); // 使用原子的 fetch_add 操作
 
             ptr_rx = new float[COL];
             ptr_ry = new float[COL];
 
-            while (true)
-            {
+            while (true) {
                 if (num_x < pool_size)//判断线程所处数据位置，如果在尾端，退出线程，并做出记号
                 {
                     rx = num_x / num_02;
                     ry = num_x % num_02;
                 }
-                else
-                {
+                else {
                     ++num_end;
                     return;
                 }
@@ -107,8 +101,7 @@ class ThreadPool
                 
                 vector<float>matr_ptr(ROW * COL);//动态规划判断矩阵
 
-                for (int i = 0; i < ROW; ++i)
-                {
+                for (int i = 0; i < ROW; ++i) {
                     if (i <= shift)
                         for (int j = 0; j < COL - shift + i; ++j)
                             matr_ptr[i * COL + j] = ptr_rx[shift - i + j] * ptr_ry[j];
@@ -125,8 +118,7 @@ class ThreadPool
                 int P = 0;
                 int J = 0;
 
-                for (int i = 0; i < ROW; ++i)//对结果进行判断输出
-                {
+                for (int i = 0; i < ROW; ++i) {//对结果进行判断输出
                     vector<float> a_num(matr_ptr.begin() + i * COL, matr_ptr.begin() + (i + 1) * COL);
                     int p = 0;
                     int n = 0; 
@@ -134,8 +126,7 @@ class ThreadPool
                     float n_s = 0;
                     float max_p = 0;
                     float max_n = 0;
-                    for (int j = 0; j < COL; ++j)
-                    {
+                    for (int j = 0; j < COL; ++j) {
                         p_s = max(p_s + a_num[j], (float)0.0); 
                         n_s = max(n_s - a_num[j], (float)0.0); 
                         if (p_s == 0) p = j + 1;
@@ -143,20 +134,33 @@ class ThreadPool
                         if (n_s == 0) n = j + 1;
                         else  if (n_s > max_n) max_n = n_s;
 
-                        if (max_p > max_n) { if (max_p > p1) { p1 = max_p; r1 =  1; I = i, P = p, J = j; } }
-                        else               { if (max_n > p1) { p1 = max_n; r1 = -1; I = i, P = n, J = j; } }
-                
+                        if (max_p > max_n) { 
+                            if (max_p > p1) { 
+                                p1 = max_p; 
+                                r1 =  1; 
+                                I = i;
+                                P = p; 
+                                J = j; 
+                            } 
+                        }
+                        else { 
+                            if (max_n > p1) { 
+                                p1 = max_n; 
+                                r1 = -1; 
+                                I = i; 
+                                P = n; 
+                                J = j; 
+                            } 
+                        }
                     }
                 }
-                if (I <= shift)
-                    {
+                if (I <= shift) {
                         x_0_data[num_x] = shift - I + P + 1; 
                         y_0_data[num_x] = P + 1; 
                         x_1_data[num_x] = shift - I + J + 1;  
                         y_1_data[num_x] = J + 1;
                     }
-                else
-                    {
+                else {
                         x_0_data[num_x] = P + 1; 
                         y_0_data[num_x] = I - shift + P + 1; 
                         x_1_data[num_x] = J + 1; 
@@ -170,8 +174,17 @@ class ThreadPool
         }
 };
 
-void thread_pool_compcore(float* x, float* y, long long num_01, long long num_02, int shift, long long COL, float* score, int* x_0,int* x_1,int* y_0,int* y_1)
-{
+void thread_pool_compcore(float* x, 
+                        float* y, 
+                        long long num_01, 
+                        long long num_02, 
+                        int shift, 
+                        long long COL, 
+                        float* score, 
+                        int* x_0, 
+                        int* x_1, 
+                        int* y_0, 
+                        int* y_1) {
     unsigned int logicalCoreCount = sysconf(_SC_NPROCESSORS_ONLN);
     unsigned int thread_num = 4*logicalCoreCount;
     // cout<<"thread_num:\t"<<thread_num<<endl;

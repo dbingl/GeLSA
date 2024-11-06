@@ -18,12 +18,31 @@ namespace py = pybind11;
 #define NN 15000ll
 
 extern "C"
-void gpu_compcore(float* x, float* y, long long num_01, long long num_02, int shift, long long COL, float* score,int* x_0,int* x_1,int* y_0,int* y_1);
+void gpu_compcore(float* x, 
+				float* y, 
+				long long num_01, 
+				long long num_02, 
+				int shift, 
+				long long COL, 
+				float* score, 
+				int* x_0, 
+				int* x_1, 
+				int* y_0, 
+				int* y_1);
 
-void thread_pool_compcore(float* x, float* y, long long num_01, long long num_02, int shift, long long COL, float* score,int* x_0,int* x_1,int* y_0,int* y_1);
+void thread_pool_compcore(float* x, 
+						float* y, 
+						long long num_01, 
+						long long num_02, 
+						int shift, 
+						long long COL, 
+						float* score, 
+						int* x_0, 
+						int* x_1, 
+						int* y_0, 
+						int* y_1);
 
-class	LSA
-{
+class	LSA {
 	public:
 		vector<float>X;
 		vector<float>Y;
@@ -40,8 +59,11 @@ class	LSA
 
 	public:
 	
-		LSA(size_t total_num_01,size_t total_num_02) :num_01(NN), num_02(NN), shift(10), COL(50)//参数化列表
-		{
+		LSA(size_t total_num_01,size_t total_num_02) 
+			:num_01(NN), // 参数化列表
+			num_02(NN), 
+			shift(10), 
+			COL(50) {
 			X.resize(num_01 * COL);
 			Y.resize(num_02 * COL);
 
@@ -66,8 +88,11 @@ class	LSA
 		}
 
 	public:
-		void assign(long long n_01, long long n_02, int s, long long col, vector<float>x, vector<float>y)
-		{
+		void assign(long long n_01, 
+					long long n_02, 
+					int s, 
+					long long col, 
+					vector<float>x, vector<float>y) {
 			num_01 = n_01;
 			num_02 = n_02;
 			shift = s;
@@ -80,8 +105,7 @@ class	LSA
 			Y.insert(Y.begin(), y.begin(), y.end());
 		}
 
-		void dp_lsa()
-		{
+		void dp_lsa() {
 			float* ptr_x = X.data();
 			float* ptr_y = Y.data();
 
@@ -108,11 +132,36 @@ class	LSA
     		cudaGetDeviceCount(&deviceCount);
 			// cout<<"deviceCount:"<<deviceCount<<"\n";
 
-			if(deviceCount>=1)
-    			gpu_compcore(ptr_x, ptr_y, num_01, num_02, shift, COL, score_data, x_0_data, x_1_data, y_0_data, y_1_data);
-			else
-				thread_pool_compcore(ptr_x, ptr_y, num_01, num_02, shift, COL, score_data, x_0_data, x_1_data, y_0_data, y_1_data);
-		}
+			if (deviceCount >= 1) {
+				// 使用 GPU 计算核心
+				gpu_compcore(
+					ptr_x, 
+					ptr_y, 
+					num_01, 
+					num_02, 
+					shift, 
+					COL, 
+					score_data, 
+					x_0_data, 
+					x_1_data, 
+					y_0_data, 
+					y_1_data);
+			} else {
+				// 使用线程池计算核心
+				thread_pool_compcore(
+					ptr_x, 
+					ptr_y, 
+					num_01, 
+					num_02, 
+					shift, 
+					COL, 
+					score_data, 
+					x_0_data, 
+					x_1_data, 
+					y_0_data, 
+					y_1_data);
+			}
+}
 
 		void lsa_clean() 
 		{
