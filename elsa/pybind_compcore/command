@@ -5,7 +5,6 @@ sudo dpkg -i cuda-keyring_1.1-1_all.deb
 sudo apt-get update
 sudo apt-get -y install cuda-toolkit-12-3
 
-
 rm -rf ./compcore.so &&
 cd pybind_compcore &&
 /usr/local/cuda-12.3/bin/nvcc -Xcompiler -fPIC \
