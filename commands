@@ -1,0 +1,231 @@
+# #HDF5库
+# wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.2/src/hdf5-1.14.2.tar.gz
+# tar -zxvf hdf5-1.14.2.tar.gz
+# cd hdf5-1.14.2
+# ./configure --prefix=/home/liy/packages/hdf5 --enable-parallel
+# make -j$(nproc)
+# sudo make install
+# echo 'export LD_LIBRARY_PATH=/home/liy/packages/hdf5/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
+# source ~/.bashrc
+# export PATH=/home/liy/packages/hdf5/bin:$PATH
+# export C_INCLUDE_PATH=/home/liy/packages/hdf5/include:$C_INCLUDE_PATH
+
+# #open -- mpi
+# wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.5.tar.gz
+# tar -xzvf openmpi-4.1.5.tar.gz
+# cd openmpi-4.1.5
+# ./configure --prefix=/home/liy/packages/open-mpi
+# make -j$(nproc)
+# make install
+# /home/liy/packages/open-mpi/bin/mpicc --version
+# vim ~/.bashrc
+# export PATH=/home/liy/packages/open-mpi/bin:$PATH
+# export LD_LIBRARY_PATH=/home/liy/packages/open-mpi/lib:$LD_LIBRARY_PATH
+# source ~/.bashrc
+# mpicc --version
+
+# #构建并行 hdf5
+# git clone https://github.com/h5py/h5py.git
+# cd h5py
+
+# #mpich
+# gcc --version
+# g++ --version
+# cmake --version
+# gfortran --version
+
+# sudo apt-get install gfortran
+
+# wget https://www.mpich.org/static/downloads/4.1.2/mpich-4.1.2.tar.gz
+# tar -zxvf mpich-4.1.2.tar.gz
+# cd mpich-4.1.2
+# ./configure --disable-psm --disable-psm2 --disable-rdmacm --disable-libibverbs --disable-libefa --prefix=/home/liy/packages/mpich
+# make -j$(nproc)
+# sudo make install
+# mpichversion
+
+# wget https://www.mpich.org/static/downloads/3.0/mpich-3.0.tar.gz
+# sudo tar -zxvf mpich-3.0.tar.gz
+# cd mpich-3.0
+# sudo ./configure -prefix=/home/liy/packages/mpich
+# sudo make -j$(nproc)
+# sudo make install 
+
+
+#磁盘
+df -h
+du -sh /home/liy/*
+du -sh /home/liy/* | sort -rh
+lsblk
+iostat
+
+#ip临时设置
+ip route show
+sudo ip addr add 172.30.128.157/24 dev enp65s0f0
+sudo ip addr del 172.30.128.26/24 dev enp65s0f0
+ip addr show enp65s0f0
+
+sudo ip addr add 172.30.128.182/24 dev enp4s0
+
+#sudo vim /etc/netplan/01-network-manager-all.yaml 永久设置
+ethernets:
+  enp65s0f0:
+    dhcp4: no
+    addresses:
+      - 172.30.128.157/24  # 在这里更新静态 IP 地址
+    gateway4: 172.30.128.254  # 更新默认网关
+    nameservers:
+      addresses: [114.114.114.114, 8.8.8.8]  # 更新 DNS 服务器
+sudo netplan apply
+
+#内存
+free -h
+cat /proc/meminfo | grep MemTotal
+sudo apt clean
+sudo apt autoremove
+
+#清理临时文件和日志文件
+sudo find /var/log -type f -exec truncate -s 0 {} \;
+sudo rm -rf /tmp/*
+
+#清理用户家目录中的临时文件
+rm -rf ~/.cache/*
+
+#使用 du 命令找出占用大量磁盘空间的文件和目录
+du -h --max-depth=1 /home/liy/
+top
+nvidia-smi pmon
+watch -n 1 nvidia-smi
+
+#创建分离进程
+screen
+Ctrl-a d
+screen -ls
+screen -r ID
+screen -X -S ID quit
+screen -ls | awk -F. '/\.uranus/{print $1}' | xargs -I {} screen -X -S {} quit
+
+#传输文件
+scp -r /home/liy/packages/pybind11/ liy@172.30.128.158:/home/liy/packages/
+scp -r /home/liy/kubernetes_proj/cri-dockerd_0.3.9.3-0.ubuntu-jammy_amd64.deb  node1@192.168.122.247:/home/node1/
+scp -r /home/liy/kubernetes_proj/cri-dockerd_0.3.9.3-0.ubuntu-jammy_amd64.deb  node2@192.168.122.236:/home/node2/
+
+# git
+sudo apt-get update && apt-get install -y git
+
+git config --global user.name "yanggaoli"
+git config --global user.email "yang98913745@163.com"
+
+mkdir elsa
+cd elsa
+cp -r ../proj_build/elsa ./
+git init
+git branch -m master
+git remote add origin https://github.com/yangaoli/a_elsa.git
+git add .
+git commit -m "add elsa reprotoristy"
+git push -u origin master:main -v
+
+git add .   # 修改
+git commit -m "a modify"
+git push origin master:main -v
+
+sudo pkill -u liy
+
+# Java
+sudo apt update
+sudo apt install openjdk-11-jdk
+# 颜色显示
+source /etc/profile
+cp /etc/skel/.bashrc ~/
+vim ~/.bashrc
+force_color_prompt=yes   # 显示出来
+source ~/.bashrc
+sudo cp ~/.bashrc /root/.bashrc  # root用户
+
+# python 版本设置
+sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1
+sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.11 2
+sudo update-alternatives --config python
+export PYTHON=/usr/bin/python3.10
+export PYTHON=/usr/local/bin/python3.8
+sudo lsof -i :8080
+sudo passwd liy
+
+#ubuntu安装Nvidia驱动
+sudo apt purge nvidia-*
+sudo apt-get update
+sudo ubuntu-drivers devices
+sudo apt install nvidia-driver-535-server
+wget https://cn.download.nvidia.com/XFree86/Linux-x86_64/535.129.03/NVIDIA-Linux-x86_64-535.129.03.run
+sudo sh NVIDIA-Linux-x86_64-535.129.03.run --dkms
+sudo reboot
+nvidia-smi
+
+# docker——environment
+sudo apt update
+sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io
+sudo usermod -aG docker $USER
+docker images
+
+sudo apt-get install -y nvidia-container-toolkit
+sudo systemctl restart docker
+
+# docker 
+# 1.uninstall old versions
+sudo apt-get purge docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras
+sudo rm -rf /var/lib/docker
+sudo rm -rf /var/lib/containerd
+
+docker rmi -f ID
+docker ps -a
+docker rm -f ID
+docker stop $(docker ps -q)
+docker container prune -f
+docker rmi -f $(docker images -q)
+
+apt-get update
+apt-get install -y sudo
+sudo adduser liy
+sudo usermod -aG sudo liy
+su - liy
+
+wget https://repo.anaconda.com/archive/Anaconda3-2023.09-0-Linux-x86_64.sh -P /home/liy/packages/
+cd /home/liy/packages/
+bash Anaconda3-2023.09-0-Linux-x86_64.sh -b -p $PWD/anaconda3
+. /home/liy/packages/anaconda3/etc/profile.d/conda.sh
+conda activate base
+conda env remove --prefix /home/liy/new/myenv/
+conda create --prefix /home/liy/new/myenv python=3.11
+conda activate /home/liy/new/myenv
+conda activate /home/liy/Tes/python2.7env
+
+cd
+git clone https://github.com/galaxyproject/galaxy.git
+cd galaxy/
+git checkout bb8c154899dbfae4f84f1b2a1f089bfd3ec4aedd
+sh run.sh
+
+docker pull bingwujiayin/weblsa:1.0
+docker run -d --name weblsa_container --network host bingwujiayin/weblsa:1.0 tail -f /dev/null
+
+docker pull ubuntu:latest
+docker run -d --name k8s ubuntu:latest tail -f /dev/null
+
+docker run -d -p 8181:8181 --name container_weblsa_01 bingwujiayin/weblsa:1.0
+
+# 在本地机器上执行以下命令生成 SSH 密钥对，如果尚未生成
+ssh-keygen -t rsa
+
+# 将你的公钥添加到目标服务器的authorized_keys文件中
+ssh-copy-id liy@172.30.128.158
+
+# 然后你可以使用以下命令传输文件，无需再输入密码
+scp /home/liy/galaxy/templates/base.mako liy@172.30.128.158:/home/liy/cp/
+scp /home/liy/galaxy/config/tool_conf.xml liy@172.30.128.158:/home/liy/cp/
+scp /home/liy/galaxy/lib/galaxy/webapps/base/static/welcome.html liy@172.30.128.158:/home/liy/cp/
+scp /home/liy/galaxy/static/cookie.html liy@172.30.128.158:/home/liy/cp/
