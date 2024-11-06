@@ -15,8 +15,8 @@ __device__ void kernel_2(float* Gpu_ptr_X,
 						int* x_0, 
 						int* y_0, 
 						int* x_1, 
-						int* y_1)              //动态规划判断
-{
+						int* y_1) {              //动态规划判断
+
 	int shift = ROW / 2;
 	int block_size = gridDim.y;
 	int thread_size = blockDim.x;
@@ -45,8 +45,7 @@ __device__ void kernel_2(float* Gpu_ptr_X,
     // }
 
 	int tid = threadIdx.x;
-	while (tid < ROW * COL)
-	{
+	while (tid < ROW * COL) {
 		ptr_s[tid]=0;
 		tid += thread_size;
 	}
@@ -62,10 +61,8 @@ __device__ void kernel_2(float* Gpu_ptr_X,
 	int d_r = ROW - 1;
 
 	//动态规划矩阵计算
-	while (cid < (shift + 1) * COL)
-	{
-		while (rx < (x + 1) * COL)
-		{
+	while (cid < (shift + 1) * COL) {
+		while (rx < (x + 1) * COL) {
 			ptr_s[cid] = Gpu_ptr_X[rx] * Gpu_ptr_Y[ry];
 			ptr_s[h_cid + d_r * COL] = Gpu_ptr_X[ry + (x - y) * COL] * Gpu_ptr_Y[rx - (x - y) * COL];
 			h_cid += thread_size;
@@ -84,13 +81,11 @@ __device__ void kernel_2(float* Gpu_ptr_X,
 	__syncthreads();
 
 	//对某一block中矩阵进行动态规划
-	if (threadIdx.x == 0)
-	{
+	if (threadIdx.x == 0) {
 		int I = 0;
 		int P = 0;
 		int J = 0;
-		for (int i = 0; i < ROW; ++i)
-		{
+		for (int i = 0; i < ROW; ++i) {
 			int p = 0;                                         //正相关起始位置
 			int n = 0;                                         //负相关起始位置
 			float p_s = 0;
@@ -98,8 +93,7 @@ __device__ void kernel_2(float* Gpu_ptr_X,
 			float max_p = 0;
 			float max_n = 0;
 
-			for (int j = 0; j < COL; ++j)
-			{
+			for (int j = 0; j < COL; ++j) {
 				p_s = max(p_s + ptr_s[i * COL + j], (float)0.0);            //状态转移方程
 				n_s = max(n_s - ptr_s[i * COL + j], (float)0.0);            //状态转移方程
 	
@@ -113,15 +107,13 @@ __device__ void kernel_2(float* Gpu_ptr_X,
 			}
 		}
 
-		if (I <= shift)
-		{
+		if (I <= shift) {
 			x_0[block_size * x + y] = shift - I + P + 1; 
 			y_0[block_size * x + y] = P + 1; 
 			x_1[block_size * x + y] = shift - I + J + 1;  
 			y_1[block_size * x + y] = J + 1;
 		}
-		else
-		{
+		else {
 			x_0[block_size * x + y] = P + 1; 
 			y_0[block_size * x + y] = I - shift + P + 1; 
 			y_1[block_size * x + y] = I - shift + J + 1; 
@@ -133,8 +125,18 @@ __device__ void kernel_2(float* Gpu_ptr_X,
 	}
 };
 
-__global__ void kernel_1(float* Gpu_ptr_X, float* Gpu_ptr_Y,int num_01,int num_02,int shift,int COL,int* r, float* score,int* x_0, int* y_0, int* x_1, int* y_1)
-{
+__global__ void kernel_1(float* Gpu_ptr_X, 
+						float* Gpu_ptr_Y,
+						int num_01,
+						int num_02,
+						int shift,
+						int COL,
+						int* r, 
+						float* score,
+						int* x_0, 
+						int* y_0, 
+						int* x_1, 
+						int* y_1) {
 	int ROW = 2 * shift + 1;
 	int x = blockIdx.x;
 	int y = blockIdx.y;
@@ -143,8 +145,17 @@ __global__ void kernel_1(float* Gpu_ptr_X, float* Gpu_ptr_Y,int num_01,int num_0
 };
 
 extern "C"
-void gpu_compcore(float* x,float* y,long long num_01,long long num_02,int shift,long long COL,float* score_data,int* x_0,int* x_1,int* y_0,int* y_1)
-{
+void gpu_compcore(float* x,
+					float* y,
+					long long num_01,
+					long long num_02,
+					int shift,
+					long long COL,
+					float* score_data,
+					int* x_0,
+					int* x_1,
+					int* y_0,
+					int* y_1) {
 	int gpuCount = -1;
 	cudaGetDeviceCount(&gpuCount);//获取显卡设备数量
 	// cout << "gpuGount:\n" << gpuCount << endl;
